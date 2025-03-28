@@ -1,7 +1,7 @@
 # Grocery Splitter
 
 A simple **Streamlit app** to help you split the grocery bill with your friends and family.
-
+conda
 <br/>
 
 
