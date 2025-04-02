@@ -56,7 +56,7 @@ def display_item(index, name, weight, quantity, price, image, names):
                       style="
                           width: 70px;
                           border-radius: 25%;
-                          background-color: transparent;
+                          background-color: white;
                       "/>
               </div>
               """,
@@ -96,7 +96,7 @@ def display_order(items, names):
 
         # Store who bought what
         assignments = items.to_dict(orient="records")
-
+        
         # read from the row of the dataframe
         for idx, row in items.iterrows():
             buyers = display_item(
@@ -200,6 +200,12 @@ def order_processor(choice, html, store_choices):
         product_rows = html.find_all("tr", class_="item-row__content")
 
         for row in product_rows:
+            # ignore if the item is unavailable
+            if "item-row__content--unavailable" in row["class"]: continue
+            
+            # ignore if the items has been substituted
+            if "item-row__content--subs-original" in row["class"]: continue
+            
             # Product name
             title_tag = row.find("h4", class_="item-title__label")
             if not title_tag:
@@ -230,7 +236,7 @@ def order_processor(choice, html, store_choices):
             price = price_tag.get_text(strip=True) if price_tag else ""
 
             item_image = row.find("img", class_="item-image__image")
-            image_url = item_image["src"] if item_image else "£0.00"
+            image_url = item_image["src"] if item_image else "https://cdn-icons-png.freepik.com/256/13701/13701566.png?semt=ais_hybrid"
 
             items.append(
                 {

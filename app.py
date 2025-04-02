@@ -130,7 +130,7 @@ if raw_names:
             if items:
                 items = pd.DataFrame(items)
                 # ignore duplicate items
-                items = items.drop_duplicates(subset=["name", "weight"], keep="first")
+                items = items.drop_duplicates(subset=["name", "weight"], keep="first").reset_index(drop=True)
                 
                 st.markdown("<br/><br/>", unsafe_allow_html=True)
                 split = display_order(items, names)
