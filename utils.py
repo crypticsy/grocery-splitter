@@ -216,6 +216,9 @@ def order_processor(choice, html, store_choices):
             match = re.match(r"(\d+)\s*x\s*(.+)", title)
             if match:
                 quantity = int(match.group(1))
+                
+                # Ignore if quantity is 0, as it may be an unavailable item
+                if quantity == 0: continue
                 name = match.group(2)
             else:
                 quantity = 1
