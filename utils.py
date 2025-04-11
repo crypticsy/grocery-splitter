@@ -199,57 +199,105 @@ def order_processor(choice, html, store_choices):
         # Find product rows
         product_rows = html.find_all("tr", class_="item-row__content")
 
-        for row in product_rows:
-            # ignore if the item is unavailable
-            if "item-row__content--unavailable" in row["class"]: continue
-            
-            # ignore if the items has been substituted
-            if "item-row__content--subs-original" in row["class"]: continue
-            
-            # Product name
-            title_tag = row.find("h4", class_="item-title__label")
-            if not title_tag:
-                continue
-            title = title_tag.get_text(strip=True)
-
-            # Quantity parsing (e.g. "2 x Something")
-            match = re.match(r"(\d+)\s*x\s*(.+)", title)
-            if match:
-                quantity = int(match.group(1))
+        if len(product_rows) > 0:
+            for row in product_rows:
+                # ignore if the item is unavailable
+                if "item-row__content--unavailable" in row["class"]: continue
                 
-                # Ignore if quantity is 0, as it may be an unavailable item
-                if quantity == 0: continue
-                name = match.group(2)
-            else:
-                quantity = 1
-                name = title
+                # ignore if the items has been substituted
+                if "item-row__content--subs-original" in row["class"]: continue
+                
+                # Product name
+                title_tag = row.find("h4", class_="item-title__label")
+                if not title_tag:
+                    continue
+                title = title_tag.get_text(strip=True)
 
-            # Weight or unit size
-            weight_tag = row.find("span", class_="item-title__weight")
-            weight = weight_tag.get_text(strip=True) if weight_tag else ""
+                # Quantity parsing (e.g. "2 x Something")
+                match = re.match(r"(\d+)\s*x\s*(.+)", title)
+                if match:
+                    quantity = int(match.group(1))
+                    
+                    # Ignore if quantity is 0, as it may be an unavailable item
+                    if quantity == 0: continue
+                    name = match.group(2)
+                else:
+                    quantity = 1
+                    name = title
 
-            # Sometimes there are additional quantities (e.g. 0.35kg + 0.37kg)
-            extra_quantities = row.find_all("span", class_="item-title__quantity")
-            if extra_quantities:
-                weights = [w.get_text(strip=True) for w in extra_quantities]
-                weight = ", ".join(weights)
+                # Weight or unit size
+                weight_tag = row.find("span", class_="item-title__weight")
+                weight = weight_tag.get_text(strip=True) if weight_tag else ""
 
-            # Price
-            price_tag = row.find("p", class_="item-price__label")
-            price = price_tag.get_text(strip=True) if price_tag else ""
+                # Sometimes there are additional quantities (e.g. 0.35kg + 0.37kg)
+                extra_quantities = row.find_all("span", class_="item-title__quantity")
+                if extra_quantities:
+                    weights = [w.get_text(strip=True) for w in extra_quantities]
+                    weight = ", ".join(weights)
 
-            item_image = row.find("img", class_="item-image__image")
-            image_url = item_image["src"] if item_image else "https://cdn-icons-png.freepik.com/256/13701/13701566.png?semt=ais_hybrid"
+                # Price
+                price_tag = row.find("p", class_="item-price__label")
+                price = price_tag.get_text(strip=True) if price_tag else ""
 
-            items.append(
-                {
-                    "name": name,
-                    "quantity": quantity,
-                    "weight": weight,
-                    "price": float(price.replace("£", "")),
-                    "image": image_url,
-                }
-            )
+                item_image = row.find("img", class_="item-image__image")
+                image_url = item_image["src"] if item_image else "https://cdn-icons-png.freepik.com/256/13701/13701566.png?semt=ais_hybrid"
+
+                items.append(
+                    {
+                        "name": name,
+                        "quantity": quantity,
+                        "weight": weight,
+                        "price": float(price.replace("£", "")),
+                        "image": image_url,
+                    }
+                )
+
+        else:
+            # Find product rows
+            product_rows = html.find_all("div", attrs={"data-testid": re.compile(r"^container-")})
+            for row in product_rows:
+                # Product image
+                item_image = row.find("img")
+                image_url = item_image["src"] if item_image and item_image.has_attr("src") else "https://cdn-icons-png.freepik.com/256/13701/13701566.png?semt=ais_hybrid"
+
+                # Product title and quantity
+                title_tag = row.find("p", string=re.compile(r"\d+\s*x\s+"))
+                if not title_tag:
+                    continue
+                title = title_tag.get_text(strip=True)
+
+                match = re.match(r"(\d+)\s*x\s*(.+)", title)
+                if match:
+                    quantity = int(match.group(1))
+                    if quantity == 0:
+                        continue
+                    name = match.group(2)
+                else:
+                    quantity = 1
+                    name = title
+
+                # Weight or unit size
+                weight = ""
+                detail_tags = row.find_all("p", class_="chakra-text css-0")
+                if len(detail_tags) > 1:
+                    weight = detail_tags[1].get_text(strip=True)
+
+                # Price
+                price_tag = row.find("p", attrs={"data-testid": re.compile(r"^totalCost-")})
+                price = price_tag.get_text(strip=True) if price_tag else "£0.00"
+                
+                if float(price.replace("£", "")) == 0:
+                    continue
+                
+                items.append(
+                    {
+                        "name": name,
+                        "quantity": quantity,
+                        "weight": weight,
+                        "price": float(price.replace("£", "")),
+                        "image": image_url,
+                    }
+                )
     
     elif choice == store_choices[1]:            
         # Find the "Rest of your items" section
