@@ -74,7 +74,7 @@ if raw_names:
         st.markdown("<br/><br/>", unsafe_allow_html=True)
 
         stores = [
-            "&nbsp; ![Asda Logo](https://upload.wikimedia.org/wikipedia/en/thumb/9/91/Asda_logo.svg/2560px-Asda_logo.svg.png) &nbsp; &nbsp;",
+            "&nbsp; ![Asda Logo](https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Asda_logo.svg/250px-Asda_logo.svg.png) &nbsp; &nbsp;",
             "&nbsp; ![Tesco Logo](https://upload.wikimedia.org/wikipedia/commons/2/23/Tesco_logo.png) &nbsp; &nbsp;",
         ]
 

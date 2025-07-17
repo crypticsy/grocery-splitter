@@ -6,27 +6,31 @@ from collections import defaultdict
 
 divider_color = "red"
 
+
 def remove_emojis(data):
-    emoj = re.compile("["
-        u"\U0001F600-\U0001F64F"  # emoticons
-        u"\U0001F300-\U0001F5FF"  # symbols & pictographs
-        u"\U0001F680-\U0001F6FF"  # transport & map symbols
-        u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
-        u"\U00002500-\U00002BEF"  # chinese char
-        u"\U00002702-\U000027B0"
-        u"\U000024C2-\U0001F251"
-        u"\U0001f926-\U0001f937"
-        u"\U00010000-\U0010ffff"
-        u"\u2640-\u2642" 
-        u"\u2600-\u2B55"
-        u"\u200d"
-        u"\u23cf"
-        u"\u23e9"
-        u"\u231a"
-        u"\ufe0f"  # dingbats
-        u"\u3030"
-                      "]+", re.UNICODE)
-    return re.sub(emoj, '', data)
+    emoj = re.compile(
+        "["
+        "\U0001f600-\U0001f64f"  # emoticons
+        "\U0001f300-\U0001f5ff"  # symbols & pictographs
+        "\U0001f680-\U0001f6ff"  # transport & map symbols
+        "\U0001f1e0-\U0001f1ff"  # flags (iOS)
+        "\U00002500-\U00002bef"  # chinese char
+        "\U00002702-\U000027b0"
+        "\U000024c2-\U0001f251"
+        "\U0001f926-\U0001f937"
+        "\U00010000-\U0010ffff"
+        "\u2640-\u2642"
+        "\u2600-\u2b55"
+        "\u200d"
+        "\u23cf"
+        "\u23e9"
+        "\u231a"
+        "\ufe0f"  # dingbats
+        "\u3030"
+        "]+",
+        re.UNICODE,
+    )
+    return re.sub(emoj, "", data)
 
 
 def display_item(index, name, weight, quantity, price, image, names):
@@ -91,12 +95,25 @@ def display_item(index, name, weight, quantity, price, image, names):
 
 def display_order(items, names):
     if not items.empty:
-        st.subheader("🧾 &nbsp; Items found", divider=divider_color)
-        st.markdown("<br/>", unsafe_allow_html=True)
+        col_1, col_2 = st.columns([4, 1])
+
+        with col_1:
+            st.subheader("🧾 &nbsp; Items found", divider=divider_color)
+            st.markdown("<br/>", unsafe_allow_html=True)
+
+        with col_2:
+            st.metric(
+                "Order Total",
+                f"£ {items["price"].sum():.2f}",
+                delta=None,
+                delta_color="normal",
+                border=True,
+                help="Total amount of the order.",
+            )
 
         # Store who bought what
         assignments = items.to_dict(orient="records")
-        
+
         # read from the row of the dataframe
         for idx, row in items.iterrows():
             buyers = display_item(
@@ -202,11 +219,13 @@ def order_processor(choice, html, store_choices):
         if len(product_rows) > 0:
             for row in product_rows:
                 # ignore if the item is unavailable
-                if "item-row__content--unavailable" in row["class"]: continue
-                
+                if "item-row__content--unavailable" in row["class"]:
+                    continue
+
                 # ignore if the items has been substituted
-                if "item-row__content--subs-original" in row["class"]: continue
-                
+                if "item-row__content--subs-original" in row["class"]:
+                    continue
+
                 # Product name
                 title_tag = row.find("h4", class_="item-title__label")
                 if not title_tag:
@@ -217,9 +236,10 @@ def order_processor(choice, html, store_choices):
                 match = re.match(r"(\d+)\s*x\s*(.+)", title)
                 if match:
                     quantity = int(match.group(1))
-                    
+
                     # Ignore if quantity is 0, as it may be an unavailable item
-                    if quantity == 0: continue
+                    if quantity == 0:
+                        continue
                     name = match.group(2)
                 else:
                     quantity = 1
@@ -240,7 +260,11 @@ def order_processor(choice, html, store_choices):
                 price = price_tag.get_text(strip=True) if price_tag else ""
 
                 item_image = row.find("img", class_="item-image__image")
-                image_url = item_image["src"] if item_image else "https://cdn-icons-png.freepik.com/256/13701/13701566.png?semt=ais_hybrid"
+                image_url = (
+                    item_image["src"]
+                    if item_image
+                    else "https://cdn-icons-png.freepik.com/256/13701/13701566.png?semt=ais_hybrid"
+                )
 
                 items.append(
                     {
@@ -254,11 +278,17 @@ def order_processor(choice, html, store_choices):
 
         else:
             # Find product rows
-            product_rows = html.find_all("div", attrs={"data-testid": re.compile(r"^container-")})
+            product_rows = html.find_all(
+                "div", attrs={"data-testid": re.compile(r"^container-")}
+            )
             for row in product_rows:
                 # Product image
                 item_image = row.find("img")
-                image_url = item_image["src"] if item_image and item_image.has_attr("src") else "https://cdn-icons-png.freepik.com/256/13701/13701566.png?semt=ais_hybrid"
+                image_url = (
+                    item_image["src"]
+                    if item_image and item_image.has_attr("src")
+                    else "https://cdn-icons-png.freepik.com/256/13701/13701566.png?semt=ais_hybrid"
+                )
 
                 # Product title and quantity
                 title_tag = row.find("p", string=re.compile(r"\d+\s*x\s+"))
@@ -283,12 +313,14 @@ def order_processor(choice, html, store_choices):
                     weight = detail_tags[1].get_text(strip=True)
 
                 # Price
-                price_tag = row.find("p", attrs={"data-testid": re.compile(r"^totalCost-")})
+                price_tag = row.find(
+                    "p", attrs={"data-testid": re.compile(r"^totalCost-")}
+                )
                 price = price_tag.get_text(strip=True) if price_tag else "£0.00"
-                
+
                 if float(price.replace("£", "")) == 0:
                     continue
-                
+
                 items.append(
                     {
                         "name": name,
@@ -298,18 +330,24 @@ def order_processor(choice, html, store_choices):
                         "image": image_url,
                     }
                 )
-    
-    elif choice == store_choices[1]:            
+
+    elif choice == store_choices[1]:
         # Find the "Rest of your items" section
         rest_of_items_header = html.find("h3", string="Rest of your items")
-        rest_container = rest_of_items_header.find_parent("article") if rest_of_items_header else None
+        rest_container = (
+            rest_of_items_header.find_parent("article")
+            if rest_of_items_header
+            else None
+        )
 
         if not rest_container:
             st.warning("No items found in the 'Rest of your items' section.")
             return []
 
         # Find product content blocks within this container
-        product_blocks = rest_container.find_all("div", class_="styled__ProductContentWrapper-mfe-orders__sc-1hj3has-7")
+        product_blocks = rest_container.find_all(
+            "div", class_="styled__ProductContentWrapper-mfe-orders__sc-1hj3has-7"
+        )
 
         items = []
         for block in product_blocks:
@@ -320,7 +358,9 @@ def order_processor(choice, html, store_choices):
 
             # Quantity
             quantity = 1
-            quantity_tag = block.find("div", class_="styled__SmallOnlyText-mfe-orders__sc-1hj3has-9")
+            quantity_tag = block.find(
+                "div", class_="styled__SmallOnlyText-mfe-orders__sc-1hj3has-9"
+            )
             if quantity_tag and "Quantity" in quantity_tag.text:
                 try:
                     quantity = int(quantity_tag.text.split(":")[1].strip())
@@ -342,13 +382,14 @@ def order_processor(choice, html, store_choices):
             price_tag = block.find("h4", {"data-testid": "receipt-total-price"})
             price = price_tag.get_text(strip=True) if price_tag else "£0.00"
 
-            items.append({
-                "name": name,
-                "quantity": quantity,
-                "weight": weight,
-                "price": float(price.replace("£", "")),
-                "image": image_url,
-            })
-
+            items.append(
+                {
+                    "name": name,
+                    "quantity": quantity,
+                    "weight": weight,
+                    "price": float(price.replace("£", "")),
+                    "image": image_url,
+                }
+            )
 
     return items
