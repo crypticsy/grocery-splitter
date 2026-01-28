@@ -18,12 +18,93 @@ st.set_page_config(
 st.markdown(
     """
         <style>
-               .block-container {
-                    padding-top: 3rem;
-                    padding-bottom: 3rem;
-                    padding-left: 6vw;
-                    padding-right: 6vw;
+            .block-container {
+                padding-top: 3rem;
+                padding-bottom: 3rem;
+                padding-left: 6vw;
+                padding-right: 6vw;
+            }
+
+            /* Print styles for full-width PDF */
+            @page {
+                margin: 0.5cm;
+                size: auto;
+            }
+
+            @media print {
+                * {
+                    box-sizing: border-box !important;
                 }
+
+                html, body {
+                    width: 100% !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    font-size: 12px !important;
+                }
+
+                .block-container {
+                    padding: 0 !important;
+                    max-width: none !important;
+                    width: 100% !important;
+                    min-width: 0 !important;
+                }
+
+                .main, .main .block-container {
+                    max-width: none !important;
+                    width: 100% !important;
+                    padding: 0 !important;
+                    margin: 0 !important;
+                }
+
+                /* Hide Streamlit elements not needed in print */
+                header, footer, .stDeployButton,
+                [data-testid="stToolbar"],
+                [data-testid="stDecoration"],
+                [data-testid="stStatusWidget"],
+                [data-testid="stSidebar"],
+                .stButton button,
+                iframe,
+                [data-testid="stHeader"] {
+                    display: none !important;
+                }
+
+                /* Make content full width */
+                .stApp, .main, [data-testid="stAppViewContainer"],
+                [data-testid="stMainBlockContainer"] {
+                    width: 100% !important;
+                    max-width: none !important;
+                    min-width: 0 !important;
+                    overflow: visible !important;
+                    padding: 0 !important;
+                    margin: 0 !important;
+                }
+
+                /* Preserve colors */
+                * {
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                    color-adjust: exact !important;
+                }
+
+                /* Ensure columns don't break across pages */
+                .row-widget, .stHorizontalBlock {
+                    page-break-inside: avoid;
+                }
+
+                /* Make columns flexible */
+                [data-testid="column"], .stColumn {
+                    min-width: 0 !important;
+                    flex: 1 1 auto !important;
+                    width: auto !important;
+                }
+
+                /* Scale down wide content to fit */
+                [data-testid="stHorizontalBlock"] {
+                    flex-wrap: nowrap !important;
+                    width: 100% !important;
+                }
+            }
         </style>
         """,
     unsafe_allow_html=True,
@@ -45,7 +126,7 @@ st.markdown(
 st.markdown("<br/>", unsafe_allow_html=True)
 
 # Create a friends tags
-st.write("👥 &nbsp; Add your friends / family to split the bill with:")
+st.write(":material/group: &nbsp; Add your friends / family to split the bill with:")
 raw_names = st.text_input("Enter the names separated by commas ( , )")
 
 names = []
@@ -57,7 +138,7 @@ if raw_names:
     
     st.write(f"Friends / Family found:")
     for f in names:
-        st.write(f"👤 &nbsp; {f}")
+        st.write(f":material/person: &nbsp; {f}")
 
 
 # Tabs with custom logos
@@ -67,7 +148,7 @@ if raw_names:
         st.markdown("<br/>", unsafe_allow_html=True)
         st.warning(
             "&nbsp; &nbsp; &nbsp; Please remove duplicate names from the list. If you want to add a friend with the same name, please add an extra detail like a last name to differentiate them.",
-            icon="⚠️",
+            icon=":material/warning:",
         )
     
     elif len(names) > 0:
@@ -95,7 +176,7 @@ if raw_names:
         st.markdown("<br/>", unsafe_allow_html=True)
 
         # Steps inside a toggle
-        with st.expander("&nbsp; &nbsp; How to Download Your Order List", icon="📥"):
+        with st.expander("&nbsp; &nbsp; How to Download Your Order List", icon=":material/download:"):
             st.divider()
             st.write("Follow the steps below to download your order list from ASDA:")
             steps = [
@@ -139,5 +220,5 @@ if raw_names:
             else:
                 st.info(
                     "&nbsp; No items found. Please upload a valid order receipt.",
-                    icon="ℹ️",
+                    icon=":material/info:",
                 )

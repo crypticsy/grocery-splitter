@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 from collections import defaultdict
 from typing import List, Dict, Union
 
@@ -26,7 +27,7 @@ def display_item(index: int, name: str, weight: str, quantity: int, price: float
         [1, 3, 6, 3, 3, 6]
     )
 
-    special_all = "👥 &nbsp; All"
+    special_all = "All"
     # Add "All" option if more than one person
     options = names.copy()
     if len(names) > 1:
@@ -158,7 +159,7 @@ def display_order(items, names: List[str]) -> Union[Dict[str, float], str]:
         col_1, col_2 = st.columns([4, 1])
 
         with col_1:
-            st.subheader("🧾 &nbsp; Items found", divider=divider_color)
+            st.subheader(":material/receipt_long: &nbsp; Items found", divider=divider_color)
             st.markdown("<br/>", unsafe_allow_html=True)
 
         with col_2:
@@ -223,7 +224,7 @@ def display_order(items, names: List[str]) -> Union[Dict[str, float], str]:
     else:
         st.info(
             "&nbsp; No items found. Please upload a valid order receipt.",
-            icon="ℹ️",
+            icon=":material/info:",
         )
         return "no_order"
 
@@ -242,7 +243,36 @@ def display_split(split: Union[Dict[str, float], str], items) -> None:
         return
 
     if split:
-        st.write("🧾 &nbsp; **Split Summary**")
+        col1, col2 = st.columns([4, 1])
+        with col1:
+            st.subheader(":material/receipt_long: &nbsp; Split Summary", divider=divider_color)
+            st.markdown("<br/>", unsafe_allow_html=True)
+        
+        with col2:
+            components.html(
+                """
+                <div style="display: flex; justify-content: flex-end;">
+                    <button onclick="window.parent.print()" style="
+                        background-color: #ff4b4b;
+                        color: white;
+                        border: none;
+                        padding: 10px 20px;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-size: 14px;
+                        font-weight: 500;
+                    ">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="vertical-align: middle; margin-right: 6px;">
+                            <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
+                            <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"/>
+                        </svg>
+                        Print PDF
+                    </button>
+                </div>
+                """,
+                height=50,
+            )
+            
         st.markdown("<br/>", unsafe_allow_html=True)
 
         metric_col, split_col = st.columns(2)
@@ -268,7 +298,7 @@ def display_split(split: Union[Dict[str, float], str], items) -> None:
                 name, price, share = split_col.columns([2, 1, 1])
 
                 with name:
-                    st.write(f"👤  &nbsp; {person}")
+                    st.write(f":material/person: &nbsp; {person}")
 
                 with price:
                     st.write(f"&nbsp; £ {amount:.2f}")
@@ -284,7 +314,7 @@ def display_split(split: Union[Dict[str, float], str], items) -> None:
     else:
         st.info(
             "&nbsp; No items have been assigned yet. Select who bought what to see the split.",
-            icon="ℹ️",
+            icon=":material/info:",
         )
 
     st.markdown("<br/>", unsafe_allow_html=True)
