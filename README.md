@@ -25,5 +25,5 @@ pip install -r requirements.txt
 
 ```shell
 # open the streamlit server
-streamlit run Home.py
+streamlit run app.py
 ```
